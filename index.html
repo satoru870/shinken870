@@ -10,7 +10,6 @@
     :root {
       --bg-gradient: radial-gradient(circle at center, #1a1c29 0%, #0a0b10 100%);
       --gold-primary: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
-      --gold-border: linear-gradient(135deg, #d4af37, #8a6d3b);
       --card-back: linear-gradient(145deg, #181b26, #0d0e15);
       --glass-panel: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(212, 175, 55, 0.25);
@@ -96,7 +95,7 @@
     #game-board {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      gap: 10px;
       width: 100%;
       max-width: 450px;
       perspective: 1000px;
@@ -134,9 +133,11 @@
 
     .card-face {
       position: absolute;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--glass-border);
@@ -154,7 +155,7 @@
     .card-back::before {
       content: '';
       position: absolute;
-      inset: 6px;
+      inset: 5px;
       border: 1px solid rgba(212, 175, 55, 0.3);
       border-radius: 6px;
     }
@@ -170,16 +171,20 @@
 
     .card-front {
       transform: rotateY(180deg);
-      background-color: #000;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
+    /* 画像の表示ズレ防止処理 */
     .card-front img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain; /* 画像を歪ませず枠内にぴったり収める */
+      display: block;
     }
 
-    /* ポップアップコンボ演出 */
     .combo-text {
       position: absolute;
       font-family: 'Cinzel', serif;
@@ -290,7 +295,7 @@
     .gallery-item img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     canvas#fx-canvas {
@@ -349,7 +354,6 @@
     let matchedPairs = 0;
     let unlockedGallery = new Set(JSON.parse(localStorage.getItem('unlockedCards') || '[]'));
 
-    // Web Audio API 初期化＆サウンド生成
     let audioCtx = null;
 
     function initAudio() {
@@ -361,7 +365,6 @@
       }
     }
 
-    // 最初のユーザー操作（クリック/タップ）でAudioContextを有効化
     window.addEventListener('click', initAudio, { once: true });
     window.addEventListener('touchstart', initAudio, { once: true });
 
@@ -372,7 +375,6 @@
       const now = audioCtx.currentTime;
 
       if (type === 'flip') {
-        // 上質なカードをめくる音
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
@@ -389,8 +391,7 @@
         osc.stop(now + 0.08);
 
       } else if (type === 'match') {
-        // 高級感あるキラキラしたハープ風チャイム音
-        const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const freqs = [523.25, 659.25, 783.99, 1046.50];
         freqs.forEach((f, i) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -409,7 +410,6 @@
         });
 
       } else if (type === 'miss') {
-        // 落ち着いた低音のミス音
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
@@ -427,7 +427,6 @@
       }
     }
 
-    // エフェクト用キャンバス設定
     const canvas = document.getElementById('fx-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -527,7 +526,6 @@
       lockBoard = false;
     }
 
-    // ゴールドの粒子エフェクト
     function createGoldSparkles(cardElement) {
       const rect = cardElement.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -540,7 +538,7 @@
           vx: (Math.random() - 0.5) * 7,
           vy: (Math.random() - 0.5) * 7,
           size: Math.random() * 4 + 2,
-          color: `hsl(${Math.random() * 20 + 40}, 100%, 70%)`, // 金色系の色相
+          color: `hsl(${Math.random() * 20 + 40}, 100%, 70%)`,
           alpha: 1,
           life: 0.025
         });
